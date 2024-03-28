@@ -57,6 +57,8 @@ special_symbols = r'[£$^&#_:@?]'
 
 numbers = r'[0|[1-9]\d*]'
 
+strings = r'("(\w|\W)+"|\'(\w|\W)+\')'
+
 
 
 
