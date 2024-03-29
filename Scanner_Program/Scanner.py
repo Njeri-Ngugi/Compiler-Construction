@@ -1,7 +1,6 @@
 # List Tokens
 # Comparison
-import re #regular expression library
-
+import re 
 
 token_list = {
     "T_KEYWORDS" : ["int","float","char","float","if","else if","else","while","for","return"],
@@ -72,27 +71,21 @@ arithmetic_operators = r'[+\-*/%]'
 logical_operators = r'(&&|\|\||!)'
 comparison_operators = r'(==|!=|<|<=|>|>=)'
 
-strings = r'("(\w|\W)+"|\'(\w|\W)+\')'
-
 
 
 # Read file and split contents into the different words
 # Need to test this part
-
-## filename = input(" Enter file path:")
-
-
-## filename = input(" Enter file path:")
-
-filename = "" #Add filename
+filename = "test.py" #Add filename
 try:
     with open(filename, 'r') as file:
         file_contents = file.read()
         lexemes = file_contents.split()
+        #maybe replace the top 2 lines with "for line in file" to read line by line without storing
 except FileNotFoundError:
     print(f"File {filename} not found")
 
 # For each word, search tokens to find the match
+
 
 
 
