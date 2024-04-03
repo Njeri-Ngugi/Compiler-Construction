@@ -1,4 +1,6 @@
 import re
+import time # To calculate execution time
+start_time = time.time()
 
 keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const"}
 
@@ -59,3 +61,10 @@ tokens = scan_file(file_path)
 for token_name, token_values in tokens.items():
     print(token_name.capitalize() ,"found:", list(set(token_values)))
     print("\n")
+
+
+end_time = time.time()
+
+execution_time = end_time - start_time
+
+print("Execution Time", execution_time )
