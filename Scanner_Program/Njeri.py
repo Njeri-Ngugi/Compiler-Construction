@@ -8,16 +8,9 @@ string_regex = r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\''
 
 identifier_regex = r'\b(?!(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b)(?!^\d)[A-Za-z_][A-Za-z0-9_]{0,29}\b'
 
+# token types and their regex
 token_regex = {
-    "int": r'\bint\b',
-    "float": r'\bfloat\b',
-    "char": r'\bchar\b',
-    "if": r'\bif\b',
-    "else_if": r'\belse\s+if\b',
-    "else": r'\belse\b',
-    "while": r'\bwhile\b',
-    "return": r'\breturn\b',
-    "const": r'\bconst\b',
+    "keywords": r'\b(?:int|float|char|if|else if|else|while|for|return)\b',
     "identifier": identifier_regex, 
     "special_symbol": r'[£$^&#_:@?]',
     "number": r'\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?\b',
@@ -54,7 +47,7 @@ def scan_file(file_path):
         return tokens
     
 # C file path
-file_path = '/home/njeriii/Documents/school/csc326/Scanner_Program/minic.c'
+file_path = '/home/njeriii/Downloads/downloads/minic.c'
 
 tokens = scan_file(file_path)
 
