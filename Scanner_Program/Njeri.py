@@ -2,7 +2,7 @@ import re
 import time # To calculate execution time
 start_time = time.time()
 
-keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const"}
+keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const", "for"}
 
 string_regex = r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\''
 
