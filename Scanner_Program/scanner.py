@@ -47,7 +47,7 @@ def scan_file(file_path):
         return tokens
     
 # C file path
-file_path = '/home/njeriii/Documents/school/csc326/Scanner_Program/miniC.c'
+file_path = '/miniC.c'
 
 tokens = scan_file(file_path)
 
