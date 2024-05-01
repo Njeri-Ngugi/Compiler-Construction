@@ -2,7 +2,7 @@ import re
 import time # To calculate execution time
 start_time = time.time()
 
-keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const"}
+keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const", "for"}
 
 string_regex = r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\''
 
@@ -12,14 +12,14 @@ identifier_regex = r'\b(?!(?:' + '|'.join(re.escape(keyword) for keyword in keyw
 token_regex = {
     "keywords": r'\b(?:int|float|char|if|else if|else|while|for|return)\b',
     "identifier": identifier_regex, 
-    "special_symbol": r'[£$^&#_:@?]',
+    "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
     "number": r'\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?\b',
     "punctuator": r'[\(\)\{\}\[\];]',
     "string": string_regex,
-    "operators": r'[+\-*/%<>&^|=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\*=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
+    "operators": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
 }
 
-# Function to tokenize input code
+# Function to assign lexemes to token types
 def tokenize(code):
     tokens = {}
 
@@ -47,12 +47,12 @@ def scan_file(file_path):
         return tokens
     
 # C file path
-file_path = '/home/njeriii/Downloads/downloads/minic.c'
+file_path = '/home/njeriii/Documents/school/csc326/Scanner_Program/miniC.c'
 
 tokens = scan_file(file_path)
 
 for token_name, token_values in tokens.items():
-    print(token_name.capitalize() ,"found:", list(set(token_values)))
+    print(token_name.capitalize() ,"found:", token_values)
     print("\n")
 
 
