@@ -13,7 +13,8 @@ token_regex = {
     "keywords": r'\b(?:int|float|char|if|else if|else|while|for|return)\b',
     "identifier": identifier_regex, 
     "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
-    "number": r'\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?\b',
+   # "number": r'\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?\b',
+    "integer" : r'-?\b(?<!\.)[-+]?\d+\b(?!\.\d)',
     "punctuator": r'[\(\)\{\}\[\];]',
     "string": string_regex,
     "operators": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
