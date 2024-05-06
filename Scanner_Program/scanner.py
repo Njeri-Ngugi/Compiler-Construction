@@ -9,11 +9,9 @@ token_types = {
     "identifier": identifier_regex,
     "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
     "integer" : r'-?\b(?<!\.)[-+]?\d+\b(?!\.\d)',
-    #"float": r'\b(?:-?\d+\.\d+|-?\.\d+)\b',
-    #FLOAT REGEX HAS BEEN CHANGED TO THE ONE BELOW
     "float" : r'-?\b\d+\.\d+\b',
     "punctuator": r'[\(\)\{\}\[\];]',
-    "string":  r'\".*?\"',
+    "string": r'\".*?\"|\'(?:\\.|[^\\\'])*\'',    
     "operator": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
 }
 
@@ -30,17 +28,22 @@ def tokenize_and_print_line(line, line_number):
             if value:
                 print("{:<16}: {}".format(name.capitalize(), value))
                 break
-
-    # find invalid tokens
-    #findAll regex has been modified
+            
     all_tokens = re.findall(r'(?<!\S)\S+|\b\w+\b', line)
-    valid_tokens = set()
-    for token_list in token_types.values():
-        valid_tokens.update(re.findall(token_list, line))
-    invalid_tokens.extend(token for token in all_tokens if token not in valid_tokens)
+    invalid_tokens = [token for token in all_tokens if not any(re.match(regex, token) for regex in token_types.values())]
 
     if invalid_tokens:
         print("{:<16}: {}".format("Invalid tokens", invalid_tokens))
+
+    # ***********************I HAVE CHANGED THIS PART*********************
+    # all_tokens = re.findall(r'(?<!\S)\S+|\b\w+\b', line)
+    # valid_tokens = set()
+    # for token_list in token_types.values():
+    #     valid_tokens.update(re.findall(token_list, line))
+    # invalid_tokens.extend(token for token in all_tokens if token not in valid_tokens)
+
+    # if invalid_tokens:
+    #     print("{:<16}: {}".format("Invalid tokens", invalid_tokens))
 
 # scan a file and tokenize its content line by line
 def scan_file(file_path):
