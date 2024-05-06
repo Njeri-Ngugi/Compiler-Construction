@@ -9,7 +9,9 @@ token_types = {
     "identifier": identifier_regex,
     "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
     "integer" : r'-?\b(?<!\.)[-+]?\d+\b(?!\.\d)',
-    "float": r'\b(?:-?\d+\.\d+|-?\.\d+)\b',
+    #"float": r'\b(?:-?\d+\.\d+|-?\.\d+)\b',
+    #FLOAT REGEX HAS BEEN CHANGED TO THE ONE BELOW
+    "float" : r'-?\b\d+\.\d+\b',
     "punctuator": r'[\(\)\{\}\[\];]',
     "string":  r'\".*?\"',
     "operator": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
@@ -30,7 +32,8 @@ def tokenize_and_print_line(line, line_number):
                 break
 
     # find invalid tokens
-    all_tokens = re.findall(r'\b\w+\b', line)
+    #findAll regex has been modified
+    all_tokens = re.findall(r'(?<!\S)\S+|\b\w+\b', line)
     valid_tokens = set()
     for token_list in token_types.values():
         valid_tokens.update(re.findall(token_list, line))
