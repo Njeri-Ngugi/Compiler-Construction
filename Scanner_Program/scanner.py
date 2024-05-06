@@ -1,64 +1,59 @@
 import re
-import time # To calculate execution time
-start_time = time.time()
+import time
 
-keywords = {"int", "float", "char", "if", "else if", "else", "while", "return", "const", "for"}
+keywords = {"int", "float", "char", "void", "if", "else if", "else", "while", "return", "const", "for"}
+identifier_regex = r'\b(?!(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b)(?!^\d)[A-Za-z_][A-Za-z0-9_]*\b'
 
-string_regex = r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\''
-
-identifier_regex = r'\b(?!(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b)(?!^\d)[A-Za-z_][A-Za-z0-9_]{0,29}\b'
-
-# token types and their regex
-token_regex = {
-    "keywords": r'\b(?:int|float|char|if|else if|else|while|for|return)\b',
-    "identifier": identifier_regex, 
+token_types = {
+    "keyword": r'\b(?:int|float|char|if|else if|else|while|for|return|void)\b',
+    "identifier": identifier_regex,
     "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
-   # "number": r'\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?\b',
     "integer" : r'-?\b(?<!\.)[-+]?\d+\b(?!\.\d)',
+    "float": r'\b(?:-?\d+\.\d+|-?\.\d+)\b',
     "punctuator": r'[\(\)\{\}\[\];]',
-    "string": string_regex,
-    "operators": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
+    "string":  r'\".*?\"',
+    "operator": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
 }
 
-# Function to assign lexemes to token types
-def tokenize(code):
-    tokens = {}
+# Combined regex for all token types
+token_regex = '|'.join('(?P<{}>{})'.format(token_name, regex) for token_name, regex in token_types.items())
 
-    for token_name, regex in token_regex.items():
-        tokens[token_name] = re.findall(regex, code)
-        
-    strings = re.findall(string_regex, code)
+# Function to tokenize a line of code and print tokens
+def tokenize_and_print_line(line, line_number):
+    print("============ LINE", line_number, "============")
+    invalid_tokens = []
 
-    # Look for words in strings incorrectly grouped as identifiers
-    filtered_identifiers = tokens["identifier"]
-    for string in strings:
-        for identifier in re.findall(identifier_regex, string):
-            if identifier in filtered_identifiers:
-                filtered_identifiers.remove(identifier)
-    
-    tokens["identifier"] = filtered_identifiers
-    
-    return tokens
+    for match in re.finditer(token_regex, line):
+        for name, value in match.groupdict().items():
+            if value:
+                print("{:<16}: {}".format(name.capitalize(), value))
+                break
 
-# read file content and group lexemes
+    # find invalid tokens
+    all_tokens = re.findall(r'\b\w+\b', line)
+    valid_tokens = set()
+    for token_list in token_types.values():
+        valid_tokens.update(re.findall(token_list, line))
+    invalid_tokens.extend(token for token in all_tokens if token not in valid_tokens)
+
+    if invalid_tokens:
+        print("{:<16}: {}".format("Invalid tokens", invalid_tokens))
+
+# scan a file and tokenize its content line by line
 def scan_file(file_path):
     with open(file_path, 'r') as file:
-        file_content = file.read()
-        tokens = tokenize(file_content)
-        return tokens
-    
-# C file path
-file_path = '/miniC.c'
+        line_number = 1
+        for line in file:
+            tokenize_and_print_line(line.strip(), line_number)
+            line_number += 1
 
-tokens = scan_file(file_path)
+# Entry point
+if __name__ == "__main__":
+    start_time = time.time()
+    file_path = 'miniC.c'
 
-for token_name, token_values in tokens.items():
-    print(token_name.capitalize() ,"found:", token_values)
-    print("\n")
+    scan_file(file_path)
 
-
-end_time = time.time()
-
-execution_time = end_time - start_time
-
-print("Execution Time", execution_time )
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print("\nExecution Time:", execution_time)
