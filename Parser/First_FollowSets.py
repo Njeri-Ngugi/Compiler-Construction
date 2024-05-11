@@ -146,8 +146,6 @@ CFGs = {
 
 "ID": [],  # Placeholder for actual identifiers
 
-
-
 }
 
 def findingFirstSets(CFGs):
@@ -155,8 +153,8 @@ def findingFirstSets(CFGs):
 
     for nonTerminals in CFGs:
         firstSets[nonTerminals] = set()
-    
-    #  Computes First set of nonTerminals recursively 
+
+    #  Computes First set of nonTerminals recursively
     def computeFirst(nonTerminals, visited):
         #  Already visited, return an empty set to break the cycle
         if nonTerminals in visited:
@@ -167,7 +165,7 @@ def findingFirstSets(CFGs):
         #  the non terminal that was passed is not a nonTerminal but a terminal add to first set (Filtering of terminals and non terminals)
         if nonTerminals in terminals:
             return {nonTerminals} #First set is a terminal
-        
+
         #  Handles ε productions
         elif nonTerminals == '':
             return {''}
@@ -176,7 +174,7 @@ def findingFirstSets(CFGs):
             first = set() #stores first set of current non Terminal symbol
 
             # Loop through RH_Production for a given non Terminal
-            for production in CFGs[nonTerminals]: 
+            for production in CFGs[nonTerminals]:
                 # Iterate through every Symbol in a single production rule
                 for i, nonTerminals_i in enumerate(production):
 
@@ -192,7 +190,7 @@ def findingFirstSets(CFGs):
                     if i == len(production) - 1:
                         first.add('')
             return first
-    
+
     # Iterate through non-terminals and compute their First sets
     for nonTerminals in CFGs:
         visited = set()
@@ -219,7 +217,7 @@ def findingFollowSets(CFGs, firstSets, terminals):
 
         for nonTerminals in CFGs:
             for production in CFGs[nonTerminals]:
-                #Checks if current non terminal is in the production  
+                #Checks if current non terminal is in the production
                 if nonTerminal in production:
                     indexing = production.index(nonTerminal)
                     # second rule
@@ -259,7 +257,7 @@ for RH_Production in CFGs.values(): # .Values gets the values of the dictionary
         for anySymbol in production:
             if anySymbol not in CFGs and anySymbol != '': #if the anySymbol is not a key in the CFG and is not empty then its a terminal
                 terminals.append(anySymbol)
-                
+
 terminals = set(terminals)
 
 
