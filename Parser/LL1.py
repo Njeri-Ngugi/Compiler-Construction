@@ -1,66 +1,105 @@
+from tabulate import tabulate
 from CFG import CFGs
-from Parse_Table import parse_table
-from Parse_Table import non_terminals
+from First_FollowSets import findingFirstSets, findingFollowSets
+from Parse_Table import parse_table, terminals, non_terminals
 
 
-def ll1_parser(CFG=CFGs, parse_table=parse_table, input="int i"):
-    # temporary sample input for now
+def ll1_parser(tables, start_symbol, input_string):
     """
-    Parses an input string using the LL1 algorithm
+    Parses the input string using LL(1) parsing technique.
 
     Args:
-        CFG (dict): A dictionary of CFGs
-        parse_table (dict): A dictionary representing the parse table
-        input (str): The input string to be parsed
-
-    Return:
-        True if input string is accepted by the grammar, else False
+        tables (dict): Lookup table for LL(1) parsing.
+        start_symbol (str): The starting symbol for parsing.
+        input_string (str): The input string to be parsed.
     """
+
+    # add '$' and start symbol to stack
     stack = ["$"]
-    stack.append(CFG['Keywords'])  # start symbol
+    stack.append(start_symbol)
+    input_string = list(input_string) + ["$"]
+    input_string.reverse()
+    top = stack[-1]
 
-    input_str = list(input) + ["$"]
+    # intialize table that tracks the steps taken in parsing
+    header = ["stack", "input", "action"]
+    table = []
 
-    while stack and input_str:
-        top = stack[-1]
-        current_input_symbol = input_str[0]
-        print("Top -> ", top)
-        print("Current Input Symbol -> ", current_input_symbol)
+    # loop until both stack and input string are empty
+    while stack and input_string:
+        row = [stack, ''.join(input_string)]
 
-        # if top of stack matches current input symbol, remove both
-        if top == current_input_symbol:
+        # if both stack and input string are empty, string accepted
+        if top == input_string[-1] == "$":
+            row.append("String accepted")
+            table.append(row)
+            break
+
+        # if top of stack and input string are same, pop
+        if top == input_string[-1]:
             stack.pop()
-            input_str.pop(0)
-            continue
+            input_string.pop()
+            row.append("pop")
+            table.append(row)
 
-        # if top of stack is non-terminal look up its production in parse table
-        if top in non_terminals:
-            production = parse_table.get((top, current_input_symbol), None)
-
-            # if rule exists, replace top with RHS of the rule in reverse
-            if production is not None:
-                stack.pop()
-
-                # if rule is epsilon simply pop the stack,
-                # else apply the production
-                if production != "ε":
-                    for symbol in reversed(production):
-                        stack.append(symbol)
-                else:
-                    stack.pop()
-            else:
-                print("Error: No production rule available.")
-                return False
-
-        # if stack top is $ and input string is empty, accept
-        elif top == "$" and current_input_symbol == "$":
-            print("Syntax correct")
-            return True
-
-        # if stack top is $ but input string is not empty, reject
+        # if top of stack and input string are not same, get production
         else:
-            print("Error: Syntax wrong.")
-            return False
+            production = tables.get((top, input_string[-1]))
 
-    print("Error: Parsing failed.")
-    return False
+            # if no production, string not accepted
+            if production is None:
+                row.append("String not accepted")
+                table.append(row)
+                break
+            stack.pop()
+
+            # if a rule exists, apply it to stack
+            if production != "ε":
+                production = list(production)
+                production.reverse()
+                stack += production
+
+            # update table
+            row.append(production)
+            table.append(row)
+
+        # if stack or input string is empty, add '$'
+        if not stack:
+            stack.append("$")
+        if not input_string:
+            input_string.append("$")
+
+    # display the table
+    print(tabulate(table, header, tablefmt="grid"))
+    return
+
+
+# yet to be edited
+def main():
+  grammar = CFGs
+  input_string = "int main"
+
+  # No need for user input for productions
+  start_symbol = list(grammar.keys())[0]
+
+  first_sets = {non_terminal: findingFirstSets(grammar) for non_terminal in grammar}
+  follow_sets = {non_terminal: findingFollowSets(grammar, first_sets, terminals) for non_terminal in grammar}
+
+  print("Input grammar::")
+  print(grammar)
+
+  print("\nFIRST sets:")
+  for non_terminal, first_set in first_sets.items():
+    print(f"FIRST({non_terminal}) = {first_set}")
+  print("\nFOLLOW sets:")
+  for non_terminal, follow_set in follow_sets.items():
+    print(f"FOLLOW({non_terminal}) = {follow_set}")
+
+  # Print the parsing table
+  print("\nParsing table:")
+  table = parse_table(grammar, first_sets, follow_sets)
+
+  ll1_parser(table, start_symbol, input_string)
+
+if __name__ == "__main__":
+  main()
