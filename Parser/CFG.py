@@ -14,7 +14,7 @@ CFGs = {
     'Operator': [['+'], ['-'], ['*'], ['/'], ['<='], ['>='], ['=='], ['!='], ['<'], ['>']],
     'RelationalOp': [['<='], ['>='], ['=='], ['!='], ['<'], ['>']],
     'LogicalOp': [['&&'], ['||'], ['!']],
-    'S': [['Number', 'Operator', 'Number'], ['Number++'], ['Number--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier++'], ['identifier--']],
+    'S': [['Number', 'Operator', 'Number'], ['Number', '++'], ['Number', '--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier', '++'], ['identifier', '--']],
     'Number': [['Integer'], ['Float']],
     'Integer': [['Sign', 'Digits'], ['Digits']],
     'Digits': [['Digit', 'Digits'], ['ε']],
@@ -46,5 +46,5 @@ CFGs = {
     'Factors': [['Identifier'], ['Expression'], ['Number']],
     'LogicalExp': [['Factors', 'LogicalOp', 'Factors']],
     'Equalityexp': [['Factors', '==', 'Factors']],
-    'Arithmeticexp': [['Number', 'Operator', 'Number'], ['Number++'], ['Number--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier++'], ['identifier--']]
+    'Arithmeticexp': [['Number', 'Operator', 'Number'], ['Number', '++'], ['Number', '--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier', '++'], ['identifier', '--']]
 }
