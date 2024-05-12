@@ -1,6 +1,3 @@
-# CODE STILL IN PROGRESS!!!!!
-# TEST INPUT STRING: 2 + 3 * (4 + 5)
-
 class Scanner:
     def __init__(self, text):
         self.tokens = text.split()
@@ -54,16 +51,23 @@ class Parser:
         else:
             return left
 
+    # Modified factor method to handle identifiers
     def factor(self):
         if self.current_token == '(':
             self.match('(')
             node = self.expr()
             self.match(')')
             return node
-        else:
+        elif self.current_token.isdigit():
             node = {'type': 'number', 'value': self.current_token}
             self.match(self.current_token)
             return node
+        elif self.current_token.isalpha():
+            node = {'type': 'identifier', 'name': self.current_token}
+            self.match(self.current_token)
+            return node
+        else:
+            raise Exception("Syntax error: unexpected token '{}'".format(self.current_token))
 
     def parse(self):
         return self.expr()
@@ -79,9 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Expr -> Term ExprTail
-# ExprTail -> + Term ExprTail | ε
-# Term -> Factor TermTail
-# TermTail -> * Factor TermTail | ε
-# Factor -> (Expr) | number
