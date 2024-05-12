@@ -1,32 +1,29 @@
-# TREE REPRESENTATION USING NLTK
-
 import nltk
 from nltk import CFG
-from nltk.parse import RecursiveDescentParser
 
-# Define a simple context-free grammar
-grammar = CFG.fromstring("""
-    S -> NP VP
-    NP -> Det N | Det N PP
-    VP -> V NP | V NP PP
-    PP -> P NP
-    Det -> 'the' | 'a'
-    N -> 'cat' | 'dog' | 'man' | 'park'
-    V -> 'chased' | 'saw'
-    P -> 'in' | 'on' | 'by'
-""")
+# Define grammar rules using a dictionary
+grammar_dict = {
+    "S": ["NP VP"],
+    "NP": ["Det N", "Det N PP"],
+    "VP": ["V NP", "V NP PP"],
+    "PP": ["P NP"],
+    "Det": ["'the'", "'a'"],
+    "N": ["'cat'", "'dog'", "'man'", "'park'"],
+    "V": ["'chased'", "'saw'"],
+    "P": ["'in'", "'on'", "'by'"]
+}
 
-# Create a parser
-parser = RecursiveDescentParser(grammar)
+# Convert dictionary to string representation of the grammar
+grammar_string = "\n".join(f"{key} -> {' | '.join(value)}" for key, value in grammar_dict.items())
 
-# Input sentence
-sentence = "the dog chased the cat in the park"
+# Create CFG from string representation
+grammar = CFG.fromstring(grammar_string)
+# print(grammar)
 
-# Tokenize the sentence
+# Example usage: parsing a sentence
+parser = nltk.ChartParser(grammar)
+sentence = "the cat chased the dog in the park"  # Corrected sentence
 tokens = nltk.word_tokenize(sentence)
 
-print(tokens)
-
-# Parse the sentence
 for tree in parser.parse(tokens):
     tree.pretty_print()
