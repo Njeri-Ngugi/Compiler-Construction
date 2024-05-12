@@ -32,7 +32,7 @@ class Parser:
         if self.current_token == '+':
             self.match('+')
             right = self.term()
-            node = {'type': 'add', 'left': left, 'right': self.expr_tail(right)}
+            node = {'type': 'operator', 'left': left, 'right': self.expr_tail(right)}
             return node
         else:
             return left
@@ -46,7 +46,7 @@ class Parser:
         if self.current_token == '*':
             self.match('*')
             right = self.factor()
-            node = {'type': 'mul', 'left': left, 'right': self.term_tail(right)}
+            node = {'type': 'operator', 'left': left, 'right': self.term_tail(right)}
             return node
         else:
             return left
