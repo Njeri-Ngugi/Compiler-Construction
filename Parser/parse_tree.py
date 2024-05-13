@@ -41,7 +41,7 @@ grammar = CFG.fromstring(grammar_string)
 
 # Example usage: parsing a sentence
 parser = nltk.ChartParser(grammar)
-sentence = ""  # Corrected sentence
+sentence = "4 / 4 . 4"  # Corrected sentence
 print("Input string: ",sentence)
 tokens = nltk.word_tokenize(sentence)
 # print(tokens)
