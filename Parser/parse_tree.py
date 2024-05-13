@@ -8,7 +8,7 @@ grammar_dict = {
     "Program": ["Arithmeticexp", "Forloop"],
     "Arithmeticexp": ["Number Operator Number", "Number '++'", "Number '--'", "Identifier Operator Identifier", "Identifier '++'", "Identifier '--'"],
     "Number": ["Integer", "Float"],
-    "Identifiers": ["Identifier Identifiers", "''"],
+    "Identifiers": ["Identifier Identifiers", "Identifier"],
     "Identifier": ["Letters Anotherletter", "'_' Anotherletter"],
     "Anotherletter": ["Character Anotherletter", "Character"],
     "Character": ["Letters", "Zerotonine", "'_'"],
@@ -20,7 +20,7 @@ grammar_dict = {
     "Digits": ["Digit Digits" , "Digit"],
     "Digit": ["Zerotonine"],
     "Zerotonine": ["'0'", "'1'", "'2'", "'3'", "'4'", "'5'", "'6'", "'7'", "'8'", "'9'"],
-    "Forloop": ["'for' '(' Expression ';' Expression ';' Expression ')' '{' Statements '}'"],
+    "Forloop": ["'for' Openbracket Expression Semicolon Expression Semicolon Expression Closebracket Openbrace Statements Closebrace"],
     "Expression": ["Assignmentexp", "Logicalexp", "Equalityexp", "Arithmeticexp", "Relationalexp"],
     "Assignmentexp": ["Identifier '=' Expression"],
     "Logicalexp": ["Factors", "LogicalOp", "Factors"],
@@ -29,6 +29,11 @@ grammar_dict = {
     "Equalityexp": ["Factors '==' Factors"],
     'RelationalOp': ["'<='", "'>='", "'=='", "'!='", "'<'", "'>'"],
     'Statements': ["Equalityexp"],
+    "Semicolon": ["';'"],
+    "Openbracket": ["'('"],
+    "Closebracket": ["')'"],
+    "Openbrace": ["'{'"],
+    "Closebrace": ["'}'"],
     }
 
 # Convert dictionary to string representation of the grammar
@@ -41,10 +46,11 @@ grammar = CFG.fromstring(grammar_string)
 
 # Example usage: parsing a sentence
 parser = nltk.ChartParser(grammar)
-sentence = "4 / 4 . 4"  # Corrected sentence
+sentence = "for ( 4 == 4 ; 4 == 4 ; 4 == 4 ) { 4 == 4 }"  # Corrected sentence
 print("Input string: ",sentence)
 tokens = nltk.word_tokenize(sentence)
 # print(tokens)
 
 for tree in parser.parse(tokens):
     tree.pretty_print()
+    break
