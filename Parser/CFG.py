@@ -14,13 +14,13 @@ CFGs = {
     'Operator': [['+'], ['-'], ['*'], ['/'], ['<='], ['>='], ['=='], ['!='], ['<'], ['>']],
     'RelationalOp': [['<='], ['>='], ['=='], ['!='], ['<'], ['>']],
     'LogicalOp': [['&&'], ['||'], ['!']],
-    'S': [['Number', 'Operator', 'Number'], ['Number', '++'], ['Number', '--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier', '++'], ['identifier', '--']],
     'Number': [['Integer'], ['Float']],
     'Integer': [['Sign', 'Digits'], ['Digits']],
     'Digits': [['Digit', 'Digits'], ['ε']],
     'Digit': [['Zero'], ['Onetonine']],
     'Zero': [['0']],
     'Onetonine': [['0'], ['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7'], ['8'], ['9']],
+    'Sign': ["'+'", "'-'"],
     'Float': [['sign', 'Digit', '.', 'Digit'], ['Digit', '.', 'Digit']],
     'Letters': [['a'], ['b'], ['c'], ['d'], ['e'], ['f'], ['g'], ['h'], ['i'], ['j'], ['k'], ['l'], ['m'], ['n'], ['o'], ['p'], ['q'], ['r'], ['s'], ['t'], ['u'], ['v'], ['w'], ['x'], ['y'], ['z'], ['A'], ['B'], ['C'], ['D'], ['E'], ['F'], ['G'], ['H'], ['I'], ['J'], ['K'], ['L'], ['M'], ['N'], ['O'], ['P'], ['Q'], ['R'], ['S'], ['T'], ['U'], ['V'], ['W'], ['X'], ['Y'], ['Z']],
     'Specialsymbols': [['!'], ['@'], ['£'], ['#'], ['$'], ['^'], ['&'], ['*'], ['+'], ['-'], ['_'], ['='], ['<'], ['>'], ['?']],
@@ -46,5 +46,9 @@ CFGs = {
     'Factors': [['Identifier'], ['Expression'], ['Number']],
     'LogicalExp': [['Factors', 'LogicalOp', 'Factors']],
     'Equalityexp': [['Factors', '==', 'Factors']],
-    'Arithmeticexp': [['Number', 'Operator', 'Number'], ['Number', '++'], ['Number', '--'], ['Identifier', 'Operator', 'Identifier'], ['Identifier', '++'], ['identifier', '--']]
+    'Arithmeticexp': [['Operand', 'Operator', 'Operand'], ['Operand', '++'], ['Operand', '--']],
+    'Operand' : [['Identifier'], ['Number'], ['(','Arithmeticexp' ,')']]
+
+}
+    
 }
