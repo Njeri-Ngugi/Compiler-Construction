@@ -1,4 +1,5 @@
 import nltk
+nltk.download('punkt')
 from nltk import CFG
 
 # Define grammar rules using a dictionary
