@@ -2,47 +2,77 @@ from tabulate import tabulate
 
 # Define grammar rules using a dictionary
 grammar_dict = {
-    "Program": ["Arithmeticexp", "Forloop"],
-    "Arithmeticexp": ["Number Operator Number", "Number '++'", "Number '--'", "Identifier Operator Identifier", "Identifier '++'", "Identifier '--'"],
-    "Number": ["Integer", "Float"],
-    "Identifiers": ["Identifier Identifiers", "Identifier"],
-    "Identifier": ["Letters Anotherletter", "'_' Anotherletter"],
-    "Anotherletter": ["Character Anotherletter", "Character"],
-    "Character": ["Letters", "Zerotonine", "'_'"],
-    "Letters": ["'a'", "'b'", "'c'", "'d'", "'e'", "'f'", "'g'", "'h'", "'i'", "'j'", "'k'", "'l'", "'m'", "'n'", "'o'", "'p'", "'q'", "'r'", "'s'", "'t'", "'u'", "'v'", "'w'", "'x'", "'y'", "'z'", "'A'", "'B'", "'C'", "'D'", "'E'", "'F'", "'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'", "'N'", "'O'", "'P'", "'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'", "'X'", "'Y'", "'Z'"],
-    "Operator": ["'+'", "'-'", "'*'", "'/'", "'<='", "'>='", "'=='", "'!='", "'<'", "'>'"],
-    "Integer": ["Sign Digits", "Digits"],
-    'Float': ["Sign Digit '.' Digit", "Digit '.' Digit"],
-    "Sign": ["'+'", "'-'"],
-    "Digits": ["Digit Digits" , "Digit"],
-    "Digit": ["Zerotonine"],
-    "Zerotonine": ["'0'", "'1'", "'2'", "'3'", "'4'", "'5'", "'6'", "'7'", "'8'", "'9'"],
-    "Forloop": ["'for' Openbracket Expression Semicolon Expression Semicolon Expression Closebracket Openbrace Statements Closebrace"],
-    "Expression": ["Assignmentexp", "Logicalexp", "Equalityexp", "Arithmeticexp", "Relationalexp"],
-    "Assignmentexp": ["Identifier '=' Expression"],
-    "Logicalexp": ["Factors", "LogicalOp", "Factors"],
-    "LogicalOp": ["'&&'", "'||'", "'!'"],
-    'Factors': ["Identifier", "'(' Expression ')'", "Number"],
-    "Equalityexp": ["Factors '==' Factors"],
-    'RelationalOp': ["'<='", "'>='", "'=='", "'!='", "'<'", "'>'"],
-    'Statements': ["Equalityexp"],
-    "Semicolon": ["';'"],
-    "Openbracket": ["'('"],
-    "Closebracket": ["')'"],
-    "Openbrace": ["'{'"],
-    "Closebrace": ["'}'"],
+    'Keywords': [['Keyword'], ['Keyword', 'Keywords'], ['']],
+    'Keyword': [['int'], ['float'], ['char'], ['if'], ['else if'], ['else'], ['while'], ['for'], ['return']],
+
+    'Strings': [['DoubleQuoteString'], ['SingleQuoteString']],
+    'DoubleQuoteString': [['"', "DoubleQuoteContent", '"']],
+    'SingleQuoteString': [["'", "SingleQuoteContent", "'"]],
+    'DoubleQuoteContent': [["NonQuoteCharacters"], ["EscapeCharacter"], ["DoubleQuoteString"]],
+    'SingleQuoteContent': [["NonQuoteCharacters"], ["EscapeCharacter"], ["SingleQuoteString"]],
+    'NonQuoteCharacter': [["Letters"], ["Digits"], ["SpecialSymbol"], ["Punctuator"]],
+    'NonQuoteCharacters': [["NonQuoteCharacter", "NonQuoteCharacters"], ['']],
+    'EscapeCharacter': [["\\"], ["\\n"], ["\\t"], ['\\"'], ["\\'"]],
+
+    'Identifiers': [['Identifier'], ['Identifier', 'Identifiers'], ['']],
+    'Identifier': [["Letters", "Anotherletter"], ["_", "Anotherletter"]],
+    'Anotherletter': [[''], ["Character", "Anotherletter"]],
+    'Character': [["Letters"], ["Digit"], ["_"]],
+    'Letters': [['a'], ['b'], ['c'], ['d'], ['e'], ['f'], ['g'], ['h'], ['i'], ['j'], ['k'], ['l'], ['m'], ['n'], ['o'], ['p'], ['q'], ['r'], ['s'], ['t'], ['u'], ['v'], ['w'], ['x'], ['y'], ['z'], ['A'], ['B'], ['C'], ['D'], ['E'], ['F'], ['G'], ['H'], ['I'], ['J'], ['K'], ['L'], ['M'], ['N'], ['O'], ['P'], ['Q'], ['R'], ['S'], ['T'], ['U'], ['V'], ['W'], ['X'], ['Y'], ['Z']],
+    'SpecialSymbol': [['!'], ['@'], ['£'], ['#'], ['$'], ['^'], ['&'], ['*'], ['+'], ['-'], ['_'], ['='], ['<'], ['>'], ['?']],
+    'Punctuator': [['('], [')'], ['{'], ['}'], ['['], [']'], ['.'], [','], [';']],
+
+    'Program': [['Type', 'Funcname', '(', 'Arglist', ')', '{', 'Statements', '}']],
+    'Type': [['void'], ['int'], ['float'], ['double'], ['char']],
+    'Funcname': [['main'], ['Identifier']],
+    'Arglist': [['Identifier'], ['Type', 'Identifier'], ['']],
+    'Arglists': [['Arglist'], ['Arglist', 'Arglists'], ['']],
+    'Statements': [['Statement'], ['Statement', 'Statements'], ['']],
+    'Statement': [['Variabledec'], ['Ifstatement'], ['Whileloop'], ['Forloop'], ['Expression'], ['Returnstatement']],
+    'Variabledec': [['Type', 'Assignmentexp']],
+    'Expression': [['Assignmentexp'], ['Logicalexp'], ['Equalityexp'], ['Arithmeticexp'], ['Relationalexp']],
+    'Ifstatement': [['if', '(', 'Expression', ')', '{', 'Statements', '}'], 
+                   ['if', '(', 'Expression', ')', '{', 'Statements', '}', 'else', '{', 'Statements', '}'], 
+                   ['if', '(', 'Expression', ')', '{', 'Statements', '}', 'Elseifstatements', 'else', '{', 'Statements', '}']],
+    'Elseifstatements': [['Elseifstatement'], ['Elseifstatement', 'Elseifstatements'], ['']],
+    'Elseifstatement': [['else', 'if', '(', 'Expression', ')', '{', 'Statements', '}']],
+    'Forloop': [['for', '(', 'Expression', ';', 'Expression', ';', 'Expression', ')', '{', 'Statements', '}']],
+    'Whileloop': [['while', '(', 'Expression', ')', '{', 'Statements', '}']],
+    'Returnstatement': [['return', 'Expression']],
+
+    'Number': [['Integer'], ['Float']],
+    'Integer': [['Sign', 'Digits'], ['Digits']],
+    'Sign': [["+"], ["-"]],
+    'Digits': [['Digit',], ['Digit', 'Digits'], ['']],
+    'Digit': [['Zero'], ['Onetonine']],
+    'Zero': [['0']],
+    'Onetonine': [['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7'], ['8'], ['9']],
+    'Float': [['Sign', 'Digits', '.', 'Digits'], ['Digits', '.', 'Digits']],
+
+    'Assignmentexp': [['Identifier', '=', 'Expression']],
+    'Logicalexp': [['Expression', 'LogicalOp', 'Expression']],
+    'LogicalOp': [['&&'], ['||']],
+    'Relationalexp': [['Expression', 'RelationalOp', 'Expression']],
+    'RelationalOp': [['<'], ['>'], ['<='], ['>=']],
+    'Equalityexp': [['Expression', 'EqualityOp', 'Expression']],
+    'EqualityOp': [['=='], ['!=']],
+    'Arithmeticexp': [['Term'],['Arithmeticexp', 'ArithmeticOp', 'Term'], ['Term', 'IncrementalOp']],
+    'ArithmeticOp': [['+'], ['-'], ['*'], ['/'], ['^'], ['%']],
+    'IncrementalOp': [['++'], ['--']],
+    'Term': [['Factor'],['Term', '*', 'Factor'],['Term', '/', 'Factor']],
+    'Factor': [['Digit'],['Identifier'],['(', 'Arithmeticexp', ')']],
+
 }
 
 # Convert dictionary to string representation of the grammar
-grammar_string = "\n".join(f"{key} -> {' | '.join(value)}" for key, value in grammar_dict.items())
+grammar_string = "\n".join(f"{key} -> {' | '.join(' '.join(prod) for prod in value)}" for key, value in grammar_dict.items())
 
 # Define function to parse productions
 def parse_production(production):
-    tokens = production.split()
-    if len(tokens) == 1 and tokens[0][0] == "'":
-        return tokens[0].strip("'")
+    if isinstance(production, list):
+        return production
     else:
-        return tokens
+        return production.split()
 
 # Convert string representation to CFG rules
 grammar_rules = []
@@ -81,7 +111,7 @@ def parse_sentence(sentence):
       if production:
         stack.pop()
         action = f"Derive {top_of_stack} -> {' '.join(production)}"
-        if production != ['ε']:
+        if production != ['']:
           stack.extend(reversed(production))
       else:
         action = "Error"
@@ -97,6 +127,6 @@ def parse_sentence(sentence):
     print("Parsing failed! The string is rejected by the grammar.")
 
 # Example usage
-sentence = "for ( 4 == 4 ; 4 == 4 ; 4 == 4 ) { 4 == 4 }"  # Corrected sentence
+sentence = "int main() { int x; x = 42; return x; }"  # Corrected sentence
 print("Input string: ", sentence)
 parse_sentence(sentence)
