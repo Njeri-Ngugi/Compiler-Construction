@@ -1,0 +1,7 @@
+Line 1: []
+Line 2: [('Keyword', 'int'), ('Identifier', 'main'), ('Punctuator', '('), ('Punctuator', ')'), ('Punctuator', '{')]
+Line 3: [('Keyword', 'int'), ('Identifier', 'x'), ('Operator', '='), ('Integer', '10'), ('Identifier', 'y'), ('Operator', '='), ('Integer', '5'), ('Punctuator', ';')]
+Line 4: [('Identifier', 'printf'), ('Punctuator', '('), ('String', '"Sum: %d\\n"'), ('Identifier', 'x'), ('Operator', '+'), ('Identifier', 'y'), ('Punctuator', ')'), ('Punctuator', ';')]
+Line 5: [('Identifier', 'printf'), ('Punctuator', '('), ('String', '"Difference: %d\\n"'), ('Identifier', 'x'), ('Operator', '-'), ('Identifier', 'y'), ('Punctuator', ')'), ('Punctuator', ';')]
+Line 6: [('Keyword', 'return'), ('Integer', '0'), ('Punctuator', ';')]
+Line 7: [('Punctuator', '}')]
