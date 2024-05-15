@@ -25,11 +25,12 @@ grammar_dict = {
     'Program': [['Type', 'Funcname', '(', 'Arglist', ')', '{', 'Statements', '}']],
     'Type': [['void'], ['int'], ['float'], ['double'], ['char']],
     'Funcname': [['main'], ['Identifier']],
-    'Arglist': [['Identifier'], ['Type', 'Identifier'], ['']],
+    'Arglist': [['Identifier'], [''], ['Type', 'Identifier']],
     'Arglists': [['Arglist'], ['Arglist', 'Arglists'], ['']],
-    'Statements': [['Statement'], ['Statement', 'Statements'], ['']],
+    'Statements': [['Statement', 'MoreStatements']],
+    'MoreStatements': [['Statement', 'MoreStatements'], ['']],
     'Statement': [['Variabledec'], ['Ifstatement'], ['Whileloop'], ['Forloop'], ['Expression'], ['Returnstatement']],
-    'Variabledec': [['Type', 'Assignmentexp']],
+    'Variabledec': [['Type', 'Identifier'], ['Type', 'Assignmentexp']],
     'Expression': [['Assignmentexp'], ['Logicalexp'], ['Equalityexp'], ['Arithmeticexp'], ['Relationalexp']],
     'Ifstatement': [['if', '(', 'Expression', ')', '{', 'Statements', '}'], 
                    ['if', '(', 'Expression', ')', '{', 'Statements', '}', 'else', '{', 'Statements', '}'], 
@@ -65,7 +66,7 @@ grammar_dict = {
 }
 
 # Convert dictionary to string representation of the grammar
-grammar_string = "\n".join(f"{key} -> {' | '.join(' '.join(prod) for prod in value)}" for key, value in grammar_dict.items())
+# grammar_string = "\n".join(f"{key} -> {' | '.join(' '.join(prod) for prod in value)}" for key, value in grammar_dict.items())
 
 # Define function to parse productions
 def parse_production(production):
@@ -103,12 +104,28 @@ def parse_sentence(sentence):
       production = None
       for non_terminal, expansion in grammar_rules:
         if non_terminal == top_of_stack:
+          print("My TOP OF THE STACK NON-TERMINAL: ", non_terminal)
           for production in expansion:
-            if current_input_token in production:
+            print(f"PRODUCTION IN EXPANSION: {production} : {expansion}")
+            if production == [''] and expansion[0] == ['']:
+                 print(f"MY CURRENT INPUT: {current_input_token} : MY PRODUCTION: {production[0]} MATCH FOUND empty")
+                 break
+            if current_input_token == production[0]:
+              print(f"MY CURRENT INPUT: {current_input_token} : MY PRODUCTION: {production[0]} MATCH FOUND")
+              
+              if production == [''] and expansion[0] == ['']:
+                 print(f"MY CURRENT INPUT: {current_input_token} : MY PRODUCTION: {production[0]} MATCH FOUND")
               break
-          if production:
+      
+          if production == [''] and expansion[0] == ['']:
+                 print(f"MY CURRENT INPUT: {current_input_token} : MY PRODUCTION: {production[0]} MATCH FOUND empty")
+                 break
+          if current_input_token == production[0]:
+            print(" CHECK 2 CURRENT INPUTPRODUCTION: ", production)
+            
             break
       if production:
+        print("POPPING PRODUCTION: ", production)
         stack.pop()
         action = f"Derive {top_of_stack} -> {' '.join(production)}"
         if production != ['']:
@@ -127,6 +144,6 @@ def parse_sentence(sentence):
     print("Parsing failed! The string is rejected by the grammar.")
 
 # Example usage
-sentence = "int main() { int x; x = 42; return x; }"  # Corrected sentence
+sentence = "int main ( ) { int x ; x = 42 ; return x ; }"  # Corrected sentence
 print("Input string: ", sentence)
 parse_sentence(sentence)
