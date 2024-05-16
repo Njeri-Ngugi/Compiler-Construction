@@ -1,5 +1,10 @@
 from tabulate import tabulate
-from CFG import grammar
+
+grammar = {
+  'Program': [['Function']],
+  'Function': [['int', 'main()', '{', 'ReturnStatement', '}']],
+  'ReturnStatement': [['return', '0;']]
+}
 
 def find_first(grammar, non_terminal, visited=None):
     if visited is None:
@@ -29,8 +34,8 @@ def find_follow(grammar, non_terminal, start_symbol, follow_set=None):
                 elif production[index + 1] not in grammar:
                     follow_set.add(production[index + 1])
                 elif production[index + 1] in grammar:
-                    first_of_next = find_first(grammar, production[index + 1]) - {'#'}
-                    if '#' in find_first(grammar, production[index + 1]):
+                    first_of_next = find_first(grammar, production[index + 1]) - {''}
+                    if '' in find_first(grammar, production[index + 1]):
                         follow_set |= find_follow(grammar, symbol, start_symbol, follow_set)
                     follow_set |= first_of_next
     if non_terminal == start_symbol:
@@ -44,9 +49,9 @@ def generate_parse_table(grammar, first_sets, follow_sets):
         for production in productions:
             first_of_production = find_first(grammar, production[0])
             for terminal in first_of_production:
-                if terminal != '#':
+                if terminal != '':
                     tables[non_terminal, terminal] = production
-            if '#' in first_of_production:
+            if '' in first_of_production:
                 for terminal in follow_sets[non_terminal]:
                     tables[non_terminal, terminal] = production
     headers = list(set(terminal for non_terminal, terminal in tables))
@@ -88,7 +93,7 @@ def ll1_algorithm(parse_tables, start_symbol, input_string):
                 parse_table.append(row)
                 break
             stack.pop()
-            if production != "#":
+            if production != "":
                 production = list(production)
                 production.reverse()
                 stack += production
