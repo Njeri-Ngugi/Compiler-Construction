@@ -1,10 +1,5 @@
 from tabulate import tabulate
-
-# Define the grammar productions
-grammar = {
-    'S': [['a', 'A', 'b'], ['c']],
-    'A': [['d'], ['ε']]
-}
+from CFG import grammar
 
 def find_first(grammar, non_terminal, visited=None):
     if visited is None:
@@ -42,7 +37,8 @@ def find_follow(grammar, non_terminal, start_symbol, follow_set=None):
         follow_set.add('$')
     return follow_set
 
-def parsing_table(grammar, first_sets, follow_sets):
+
+def generate_parse_table(grammar, first_sets, follow_sets):
     tables = {}
     for non_terminal, productions in grammar.items():
         for production in productions:
@@ -65,31 +61,31 @@ def parsing_table(grammar, first_sets, follow_sets):
     print(tabulate(table, headers, tablefmt="grid"))
     return tables
 
-def stack_implementation(tables, start_symbol, input_string):
-    # add '$' to stack
+def ll1_algorithm(parse_tables, start_symbol, input_string):
     stack = ["$"]
     stack.append(start_symbol)
-    input_string = list(input_string)
+    input_string = input_string.split()
     input_string.append("$")
     input_string.reverse()
+
     header = ["stack", "input", "action"]
-    table = []
+    parse_table = []
     while stack and input_string:
-        row = [stack, ''.join(input_string)]
+        row = [stack, ' '.join(input_string)]
         if stack[-1] == input_string[-1] == "$":
             row.append("String accepted")
-            table.append(row)
+            parse_table.append(row)
             break
         if stack[-1] == input_string[-1]:
             stack.pop()
             input_string.pop()
             row.append("pop")
-            table.append(row)
+            parse_table.append(row)
         else:
-            production = tables.get((stack[-1], input_string[-1]))
+            production = parse_tables.get((stack[-1], input_string[-1]))
             if production is None:
                 row.append("String not accepted")
-                table.append(row)
+                parse_table.append(row)
                 break
             stack.pop()
             if production != "#":
@@ -97,40 +93,32 @@ def stack_implementation(tables, start_symbol, input_string):
                 production.reverse()
                 stack += production
             row.append(production)
-            table.append(row)
+            parse_table.append(row)
         if not stack:
             stack.append("$")
         if not input_string:
             input_string.append("$")
-    print(tabulate(table, header, tablefmt="grid"))
+    print(tabulate(parse_table, header, tablefmt="grid"))
     return
 
 
 def main():
-  # No need for user input for productions
   start_symbol = list(grammar.keys())[0]
-
   first_sets = {non_terminal: find_first(grammar, non_terminal) for non_terminal in grammar}
   follow_sets = {non_terminal: find_follow(grammar, non_terminal, start_symbol) for non_terminal in grammar}
 
-  print("This is the input grammar::")
-  print(grammar)
 
   print("\nFIRST sets:")
   for non_terminal, first_set in first_sets.items():
-    print(f"FIRST({non_terminal}) = {first_set}")
+    print(f"-FIRST({non_terminal}) = {first_set}")
   print("\nFOLLOW sets:")
   for non_terminal, follow_set in follow_sets.items():
-    print(f"FOLLOW({non_terminal}) = {follow_set}")
+    print(f"-FOLLOW({non_terminal}) = {follow_set}")
 
-  # Print the parsing table
-  print("\nParsing table:")
-  table = parsing_table(grammar, first_sets, follow_sets)
-
-  # Example stack implementation
-  print("\nExample stack implementation:")
-  input_string = input("Enter the input string: ")
-  stack_implementation(table, start_symbol, input_string)
+  print("\nParse Table:")
+  parse_table = generate_parse_table(grammar, first_sets, follow_sets)
+  input_string = "int main() { return 0; }"
+  ll1_algorithm(parse_table, start_symbol, input_string)
 
 if __name__ == "__main__":
   main()
