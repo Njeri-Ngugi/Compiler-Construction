@@ -368,8 +368,8 @@ def print_parse_table(grammar_dict):
                     parse_table[non_terminals.index(non_terminal) + 1][terminals.index(terminal) + 1] = production
 
     # Print the first ten rows and columns of the parse table using tabulate
-    first_five_rows = parse_table[:5]
-    first_five_columns = [row[:5] for row in first_five_rows]
+    first_five_rows = parse_table[:10]
+    first_five_columns = [row[:10] for row in first_five_rows]
 
     # Ensure the first cell of the first row is empty
     first_five_columns[0][0] = ""
