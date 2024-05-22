@@ -69,30 +69,10 @@ def scan_file(file_path):
             line_number += 1
     return token_list # list of tuples (token_type, token_value)
 
-# def generate_output_filename(input_file):
-#     """
-#     Generates a unique output filename based on the input filename
-
-#     Args:
-#         input_file - path to the input file
-
-#     Returns:
-#         output_file - unique output filename
-#     """
-#     base_name, ext = os.path.splitext(input_file)
-#     output_file = base_name + ".txt"
-#     count = 1
-#     while os.path.exists(output_file):
-#         output_file = f"{base_name}{count}.txt"
-#         count += 1
-#     return output_file
-
-
 
 if __name__ == "__main__":
     start_time = time.time()
     input_file = 'Scanner_Program/mini2.c'
-    # output_file = generate_output_filename(input_file)
     tokens = scan_file(input_file)
 
     end_time = time.time()
