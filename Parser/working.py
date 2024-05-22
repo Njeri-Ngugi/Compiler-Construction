@@ -141,7 +141,7 @@ def ll1_algorithm(parse_table, start_symbol, token_list):
 
 
 def use_tokens():
-    input_file = '../Scanner_Program/mini2.c'
+    input_file = 'Scanner_Program/mini2.c'
     tokens = scan_file(input_file)
     all_tokens = [token for sublist in tokens for token in sublist]
     return all_tokens

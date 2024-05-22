@@ -91,7 +91,7 @@ def scan_file(file_path):
 
 if __name__ == "__main__":
     start_time = time.time()
-    input_file = '../Scanner_Program/mini2.c'
+    input_file = 'Scanner_Program/mini2.c'
     # output_file = generate_output_filename(input_file)
     tokens = scan_file(input_file)
 
