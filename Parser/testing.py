@@ -6,7 +6,7 @@ import sys
 
 # Define grammar rules using a dictionary
 grammar_dict = {
-    'Program': [['Type', 'Identifier', '(', 'Arglists', ')', '{', 'Statements', '}']],
+    'Program': [['Type', 'Identifier', '(', 'Arglists', ')', '{', 'Statements', '}', 'Program'], ['']],
     'Type': [['Keyword']],
     'Arglists': [['Arglist'], ['Arglist', 'Arglists'], ['']],
     'Arglist': [['Type', 'Identifier']],
