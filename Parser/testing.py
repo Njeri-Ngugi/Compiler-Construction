@@ -4,13 +4,6 @@ from collections import deque
 import os
 import sys
 
-# import scanner from Scanner_Program in parent dir
-# current_dir = os.path.dirname(os.path.realpath(__file__))
-# parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
-# sys.path.append(parent_dir)
-
-# from Scanner_Program.scanner2 import scan_file
-
 # Define grammar rules using a dictionary
 grammar_dict = {
     'Program': [['Type', 'Identifier', '(', 'Arglists', ')', '{', 'Statements', '}']],
@@ -19,8 +12,6 @@ grammar_dict = {
     'Arglist': [['Type', 'Identifier']],
     'Statements': [['Statement', 'Statements'], ['']],
     'Statement': [['Ifstatement'], ['Whileloop'], ['Forloop'], ['Expression'], ['Returnstatement'], ['Variabledec']],
-
-
     'Ifstatement': [['if', '(', 'Expression', ')', '{', 'Statements', '}'],
                     ['if', '(', 'Expression', ')',
                      '{', 'Statements', '}', 'else', '{', 'Statements', '}'],
@@ -30,9 +21,7 @@ grammar_dict = {
     'Whileloop': [['while', '(', 'Expression', ')', '{', 'Statements', '}']],
     'Forloop': [['for', '(', 'Expression', ';', 'Expression', ';', 'Expression', ')', '{', 'Statements', '}']],
     'Returnstatement': [['Return', 'Value', ';'], ['Return', 'Identifier', ';']],
-
     'Variabledec': [['Type', 'Identifier', ';'], ['Type', 'Assignmentexp']],
-
     'Expression': [['Assignmentexp'], ['Logicalexp'], ['Equalityexp'], ['Arithmeticexp'], ['Relationalexp']],
     'Assignmentexp': [['Identifier', 'AssignmentOp', 'Value', ';']],
     'Value': [['String'], ['Integer'], ['Float']],
@@ -43,20 +32,68 @@ grammar_dict = {
     'Arithmeticexp': [['Term'], ['Arithmeticexp', 'ArithmeticOp', 'Term'], ['Term', 'IncrementalOp'], ['Term', 'DecrementalOp']],
     'Term': [['Factor'], ['Term', 'Operator', 'Factor'], ['Term', 'Operator', 'Factor']],
     'Factor': [['Integer'], ['Float'], ['(', 'Arithmeticexp', ')']],
-
-
-    # 'Statements': [['Variabledec', 'Operator', 'Value', ';', 'Statements'], [''], ['Return']],
-    # 'Statements' : ['Return' , 'Statements'],
-    # 'Variabledec': [['Type', 'Identifier']]
-    # 'Return': [['keyword', 'integer', ';']],
-    # 'Return': [['Type', 'integer', ';']
-    # 'Variabledec': [['Type', 'Identifier', 'operator', 'integer', ';']],
-    # 'Identifier': [['Letters', 'Lettersequence'], ['_','Letter', 'Lettersequence'] ],
-    # 'Lettersequence': [['Letter', 'Lettersequence'], [''] ],
-    # 'Letter': [["Letters"], ["Digit"], ["_"]],
-    # 'Letters': [['a'], ['b'], ['c'], ['d'], ['e'], ['f'], ['g'], ['h'], ['i'], ['j'], ['k'], ['l'], ['m'], ['n'], ['o'], ['p'], ['q'], ['r'], ['s'], ['t'], ['u'], ['v'], ['w'], ['x'], ['y'], ['z'], ['A'], ['B'], ['C'], ['D'], ['E'], ['F'], ['G'], ['H'], ['I'], ['J'], ['K'], ['L'], ['M'], ['N'], ['O'], ['P'], ['Q'], ['R'], ['S'], ['T'], ['U'], ['V'], ['W'], ['X'], ['Y'], ['Z']],
 }
 
+# Node class to represent parse tree nodes
+
+
+class ParseTreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.children = []
+
+    def add_child(self, node):
+        self.children.append(node)
+
+    def __repr__(self, level=0):
+        ret = "\t" * level + repr(self.value) + "\n"
+        for child in self.children:
+            ret += child.__repr__(level + 1)
+        return ret
+
+    def pretty_print(self, prefix='', is_last=True):
+        ret = prefix + ("└── " if is_last else "├── ") + str(self.value) + "\n"
+        prefix += "    " if is_last else "│   "
+        child_count = len(self.children)
+        for i, child in enumerate(self.children):
+            is_last_child = (i == child_count - 1)
+            ret += child.pretty_print(prefix, is_last_child)
+        return ret
+
+
+class IntermediateCodeGenerator:
+    def __init__(self):
+        self.code = []
+        self.temp_count = 0
+
+    def new_temp(self):
+        temp = f"t{self.temp_count}"
+        self.temp_count += 1
+        return temp
+
+    def generate_code(self, node):
+        if not node.children:
+            return node.value
+
+        if len(node.children) == 1:
+            return self.generate_code(node.children[0])
+
+        left = self.generate_code(node.children[0])
+        op = node.children[1].value
+        right = self.generate_code(node.children[2])
+
+        temp = self.new_temp()
+        self.code.append((temp, '=', left, op, right))
+        return temp
+
+    def __repr__(self):
+        return "\n".join([" ".join(instr) for instr in self.code])
+
+
+def generate_intermediate_code(parse_tree):
+    icg = IntermediateCodeGenerator()
+    icg.generate_code(parse_tree)
+    return icg
 
 def use_tokens():
     input_file = 'mini2.c'
@@ -151,12 +188,20 @@ def parse_sentence(grammar, parse_table, tokens):
     print("Tokens: ", tokens)
     tokens.append(('$', '$'))
     stack = deque(['$', 'Program'])
+    root = ParseTreeNode('Program')
+    parse_tree_stack = deque([root])
     actions = []
 
     index = 0
     while stack:
         top = stack.pop()
         current_token_type, current_token_value = tokens[index]
+
+        # Synchronize the parse tree stack
+        if parse_tree_stack:
+            current_tree_node = parse_tree_stack.pop()
+        else:
+            current_tree_node = None
 
         if top == current_token_value or top == current_token_type:
             index += 1
@@ -169,6 +214,14 @@ def parse_sentence(grammar, parse_table, tokens):
             if production != ['']:
                 print(f"Production: {top} : {' '.join(production)}")
                 stack.extend(production[::-1])
+
+                # Add new nodes to parse tree stack
+                new_nodes = [ParseTreeNode(symbol)
+                             for symbol in production[::-1]]
+                for node in new_nodes:
+                    if current_tree_node is not None:
+                        current_tree_node.add_child(node)
+                parse_tree_stack.extend(new_nodes)
             actions.append((f"Derive {top} -> {' '.join(production)}",
                            " ".join(token[1] for token in tokens[index:]), list(stack)))
         elif top in grammar and [''] in grammar[top]:
@@ -187,6 +240,12 @@ def parse_sentence(grammar, parse_table, tokens):
         print("Parsing failed! The string is rejected by the grammar.")
     else:
         print("Parsing successful! The string is accepted by the grammar.")
+        print("Parse Tree:")
+        print(root.pretty_print())
+
+        icg = generate_intermediate_code(root)
+        print("Intermediate Code:")
+        print(icg)
 
 
 if __name__ == "__main__":
