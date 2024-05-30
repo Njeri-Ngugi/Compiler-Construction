@@ -6,7 +6,7 @@ import sys
 
 # Define grammar rules using a dictionary
 grammar_dict = {
-    'Program': [['Type', 'Identifier', '(', 'Arglists', ')', '{', 'Statements', '}', 'Program'], ['']],
+    'Program': [['Type', 'Identifier', '(', 'Arglists', ')', '{', 'Statements', '}']],
     'Type': [['Keyword']],
     'Arglists': [['Arglist'], ['Arglist', 'Arglists'], ['']],
     'Arglist': [['Type', 'Identifier']],
@@ -75,25 +75,63 @@ class IntermediateCodeGenerator:
         if not node.children:
             return node.value
 
+        # Handle different types of nodes specifically
+        if node.value == 'Assignmentexp':
+            identifier = self.generate_code(node.children[0])
+            operator = node.children[1].value
+            value = self.generate_code(node.children[2])
+            self.code.append((identifier, operator, value))
+            return identifier
+
+        elif node.value == 'Expression':
+            return self.generate_code(node.children[0])
+
+        elif node.value == 'Arithmeticexp':
+            if len(node.children) == 1:
+                return self.generate_code(node.children[0])
+            else:
+                left = self.generate_code(node.children[0])
+                op = node.children[1].value
+                right = self.generate_code(node.children[2])
+                temp = self.new_temp()
+                self.code.append((temp, '=', left, op, right))
+                return temp
+
+        elif node.value == 'Term':
+            if len(node.children) == 1:
+                return self.generate_code(node.children[0])
+            else:
+                left = self.generate_code(node.children[0])
+                op = node.children[1].value
+                right = self.generate_code(node.children[2])
+                temp = self.new_temp()
+                self.code.append((temp, '=', left, op, right))
+                return temp
+
+        elif node.value == 'Factor':
+            if len(node.children) == 1:
+                return self.generate_code(node.children[0])
+            elif node.children[0].value == '(':
+                return self.generate_code(node.children[1])
+
+        # By default, handle node with single child
         if len(node.children) == 1:
             return self.generate_code(node.children[0])
 
-        left = self.generate_code(node.children[0])
-        op = node.children[1].value
-        right = self.generate_code(node.children[2])
-
-        temp = self.new_temp()
-        self.code.append((temp, '=', left, op, right))
-        return temp
+        # General handling for other types of nodes
+        for child in node.children:
+            self.generate_code(child)
 
     def __repr__(self):
         return "\n".join([" ".join(instr) for instr in self.code])
 
-
+# Define the generate_intermediate_code function
 def generate_intermediate_code(parse_tree):
     icg = IntermediateCodeGenerator()
     icg.generate_code(parse_tree)
     return icg
+
+
 
 def use_tokens():
     input_file = 'mini2.c'
