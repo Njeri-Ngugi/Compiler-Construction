@@ -292,6 +292,13 @@ if __name__ == "__main__":
     first_sets = {nt: find_first(grammar_dict, nt) for nt in grammar_dict}
     follow_sets = {nt: find_follow(grammar_dict, nt, 'Program')
                    for nt in grammar_dict}
+    #Printing Sets
+     print("\nFIRST SETS")
+    for non_terminal, first_set in first_sets.items():
+        print(f" FIRST({non_terminal}) : {{ {', '.join(first_set)} }}")
+    print("\nFOLLOW SETS")
+    for non_terminal, follow_set in follow_sets.items():
+        print(f" FOLLOW({non_terminal}) : {{ {', '.join(follow_set)} }}")
 
     parse_table = parsing_table(grammar_dict, first_sets, follow_sets)
 
