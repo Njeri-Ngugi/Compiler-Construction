@@ -223,7 +223,7 @@ def parsing_table(grammar, first_sets, follow_sets):
 
 
 def parse_sentence(grammar, parse_table, tokens):
-    print("Tokens: ", tokens)
+   # print("Tokens: ", tokens)
     tokens.append(('$', '$'))
     stack = deque(['$', 'Program'])
     root = ParseTreeNode('Program')
