@@ -3,6 +3,7 @@ from tabulate import tabulate
 from collections import deque
 import os
 import sys
+import time
 
 # Define grammar rules using a dictionary
 grammar_dict = {
@@ -23,7 +24,7 @@ grammar_dict = {
     'Returnstatement': [['Return', 'Value', ';'], ['Return', 'Identifier', ';']],
     'Variabledec': [['Type', 'Identifier', ';'], ['Type', 'Assignmentexp']],
     'Expression': [['Assignmentexp'], ['Logicalexp'], ['Equalityexp'], ['Arithmeticexp'], ['Relationalexp']],
-    'Assignmentexp': [['Identifier', 'AssignmentOp', 'Value', ';']],
+    'Assignmentexp': [['Identifier', 'AssignmentOp', 'Expression', ';'], ['Identifier', 'AssignmentOp', 'Value', ';']],
     'Value': [['String'], ['Integer'], ['Float']],
     'Operator': [['LogicalOp'], ['ArithmeticOp'], ['RelationalOp'], ['EqualityOp'], ['AssignmentOp']],
     'Logicalexp': [['Expression', 'LogicalOp', 'Expression']],
@@ -61,30 +62,85 @@ class ParseTreeNode:
         return ret
 
 
+class ASTNode:
+    def __init__(self, value, children=None):
+        self.value = value
+        self.children = children if children is not None else []
+
+    def add_child(self, node):
+        self.children.append(node)
+
+    def __repr__(self):
+        return f"ASTNode({self.value})"
+
+    def pretty_print(self, level=0):
+        ret = "  " * level + repr(self) + "\n"
+        for child in self.children:
+            ret += child.pretty_print(level + 1)
+        return ret
+
+# Function to transform parse tree to AST
+
+
+def parse_tree_to_ast(parse_node):
+    if not parse_node.children:
+        return ASTNode(parse_node.value)
+
+    ast_node = ASTNode(parse_node.value)
+    for child in parse_node.children:
+        ast_child = parse_tree_to_ast(child)
+        if ast_child:
+            ast_node.add_child(ast_child)
+
+    # Simplify the AST by flattening nodes with single children
+    if len(ast_node.children) == 1:
+        return ast_node.children[0]
+
+    return ast_node
+
+
 class IntermediateCodeGenerator:
     def __init__(self):
         self.code = []
         self.temp_count = 0
+        self.label_count = 0
 
     def new_temp(self):
         temp = f"t{self.temp_count}"
         self.temp_count += 1
         return temp
 
-    def generate_code(self, node):
-        if not node.children:
-            return node.value
+    def new_label(self):
+        label = f"L{self.label_count}"
+        self.label_count += 1
+        return label
 
-        # Handle different types of nodes specifically
-        if node.value == 'Assignmentexp':
+    def generate_code(self, node):
+        if node.value == 'Program':
+            for child in node.children:
+                self.generate_code(child)
+
+        elif node.value == 'Variabledec':
+            if node.children[1].value == 'Assignmentexp':
+                identifier = self.generate_code(node.children[1].children[0])
+                value = self.generate_code(node.children[1].children[2])
+                self.code.append(f"{identifier} = {value}")
+            else:
+                identifier = self.generate_code(node.children[1])
+                self.code.append(f"{node.children[0].value} {identifier}")
+
+        elif node.value == 'Assignmentexp':
             identifier = self.generate_code(node.children[0])
-            operator = node.children[1].value
             value = self.generate_code(node.children[2])
-            self.code.append((identifier, operator, value))
+            self.code.append(f"{identifier} = {value}")
             return identifier
 
-        elif node.value == 'Expression':
-            return self.generate_code(node.children[0])
+        elif node.value == 'Returnstatement':
+            value = self.generate_code(node.children[1])
+            self.code.append(f"return {value}")
+
+        elif node.value in {'Integer', 'Identifier', 'Keyword'}:
+            return node.children[0] if node.children else node.value
 
         elif node.value == 'Arithmeticexp':
             if len(node.children) == 1:
@@ -94,43 +150,69 @@ class IntermediateCodeGenerator:
                 op = node.children[1].value
                 right = self.generate_code(node.children[2])
                 temp = self.new_temp()
-                self.code.append((temp, '=', left, op, right))
+                self.code.append(f"{temp} = {left} {op} {right}")
                 return temp
 
-        elif node.value == 'Term':
-            if len(node.children) == 1:
-                return self.generate_code(node.children[0])
-            else:
-                left = self.generate_code(node.children[0])
-                op = node.children[1].value
-                right = self.generate_code(node.children[2])
-                temp = self.new_temp()
-                self.code.append((temp, '=', left, op, right))
-                return temp
+        elif node.value == 'Ifstatement':
+            cond = self.generate_code(node.children[1])
+            true_label = self.new_label()
+            false_label = self.new_label()
+            end_label = self.new_label()
 
-        elif node.value == 'Factor':
-            if len(node.children) == 1:
-                return self.generate_code(node.children[0])
-            elif node.children[0].value == '(':
-                return self.generate_code(node.children[1])
+            self.code.append(f"if {cond} goto {true_label}")
+            self.code.append(f"goto {false_label}")
+            self.code.append(f"{true_label}:")
+            self.generate_code(node.children[3])
+            self.code.append(f"goto {end_label}")
+            self.code.append(f"{false_label}:")
+            if len(node.children) > 5 and node.children[5].value == 'else':
+                self.generate_code(node.children[7])
+            self.code.append(f"{end_label}:")
 
-        # By default, handle node with single child
-        if len(node.children) == 1:
-            return self.generate_code(node.children[0])
+        elif node.value == 'Whileloop':
+            start_label = self.new_label()
+            true_label = self.new_label()
+            end_label = self.new_label()
 
-        # General handling for other types of nodes
-        for child in node.children:
-            self.generate_code(child)
+            self.code.append(f"{start_label}:")
+            cond = self.generate_code(node.children[1])
+            self.code.append(f"if {cond} goto {true_label}")
+            self.code.append(f"goto {end_label}")
+            self.code.append(f"{true_label}:")
+            self.generate_code(node.children[3])
+            self.code.append(f"goto {start_label}")
+            self.code.append(f"{end_label}:")
+
+        elif node.value == 'Forloop':
+            init = self.generate_code(node.children[2])
+            cond = self.generate_code(node.children[4])
+            inc = self.generate_code(node.children[6])
+            start_label = self.new_label()
+            true_label = self.new_label()
+            end_label = self.new_label()
+
+            self.code.append(init)
+            self.code.append(f"{start_label}:")
+            self.code.append(f"if {cond} goto {true_label}")
+            self.code.append(f"goto {end_label}")
+            self.code.append(f"{true_label}:")
+            self.generate_code(node.children[8])
+            self.code.append(inc)
+            self.code.append(f"goto {start_label}")
+            self.code.append(f"{end_label}:")
+
+        else:
+            for child in node.children:
+                self.generate_code(child)
 
     def __repr__(self):
-        return "\n".join([" ".join(instr) for instr in self.code])
+        return "\n".join(self.code)
 
-# Define the generate_intermediate_code function
-def generate_intermediate_code(parse_tree):
+
+def generate_intermediate_code(ast_root):
     icg = IntermediateCodeGenerator()
-    icg.generate_code(parse_tree)
+    icg.generate_code(ast_root)
     return icg
-
 
 
 def use_tokens():
@@ -241,7 +323,7 @@ def parse_sentence(grammar, parse_table, tokens):
         else:
             current_tree_node = None
 
-        if top == current_token_value or top == current_token_type:
+        if top in (current_token_value, current_token_type):
             index += 1
             actions.append(("Match", top, " ".join(
                 token[1] for token in tokens[index:])))
@@ -281,9 +363,16 @@ def parse_sentence(grammar, parse_table, tokens):
         print("Parse Tree:")
         print(root.pretty_print())
 
-        icg = generate_intermediate_code(root)
+        ast_root = parse_tree_to_ast(root)
+        print("AST:")
+        print(ast_root.pretty_print())
+
+        start_time = time.time()
+        icg = generate_intermediate_code(ast_root)
+        end_time = time.time()
         print("Intermediate Code:")
         print(icg)
+        print("\n\n\nExecution time", end_time - start_time)
 
 
 if __name__ == "__main__":
