@@ -301,6 +301,7 @@ if __name__ == "__main__":
         print(f" FOLLOW({non_terminal}) : {{ {', '.join(follow_set)} }}")
 
     parse_table = parsing_table(grammar_dict, first_sets, follow_sets)
+    print(parse_table)
 
     terminals = sorted(set(term for _, term in parse_table.keys()))
     headers = ["Non-Terminal"] + terminals
