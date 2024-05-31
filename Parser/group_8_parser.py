@@ -1,8 +1,6 @@
-from scanner2 import scan_file
+from group_8_scanner import scan_file
 from tabulate import tabulate
 from collections import deque
-import os
-import sys
 import time
 
 # Define grammar rules using a dictionary
@@ -36,7 +34,6 @@ grammar_dict = {
 }
 
 # Node class to represent parse tree nodes
-
 
 class ParseTreeNode:
     def __init__(self, value):
@@ -216,7 +213,7 @@ def generate_intermediate_code(ast_root):
 
 
 def use_tokens():
-    input_file = 'mini2.c'
+    input_file = 'Parser/mini2.c'
     tokens = scan_file(input_file)
     all_tokens = [token for sublist in tokens for token in sublist]
     return all_tokens
@@ -301,11 +298,26 @@ def parsing_table(grammar, first_sets, follow_sets):
             if '' in first_of_prod:
                 for term in follow_sets[non_term]:
                     tables[non_term, term] = prod
+
+    # Save the parse table to a file
+    save_parse_table(tables, "parse_table.txt")
     return tables
+
+def save_parse_table(parse_table, filename):
+    terminals = sorted(set(term for _, term in parse_table.keys()))
+    non_terminals = sorted(set(non_term for non_term, _ in parse_table.keys()))
+
+    # Construct the table data
+    table_data = [[non_term] + [parse_table.get((non_term, term), '') for term in terminals] for non_term in non_terminals]
+
+    # Save the table to the file
+    with open(filename, 'w') as f:
+        f.write(tabulate(table_data, headers=["Non-Terminal"] + terminals, tablefmt="grid"))
+    print("\n\tParse table saved to ", filename)
 
 
 def parse_sentence(grammar, parse_table, tokens):
-    print("Tokens: ", tokens)
+    print("\nTokens: ", tokens, end="\n\n")
     tokens.append(('$', '$'))
     stack = deque(['$', 'Program'])
     root = ParseTreeNode('Program')
@@ -354,8 +366,14 @@ def parse_sentence(grammar, parse_table, tokens):
                            " ".join(token[1] for token in tokens[index:])))
             break
 
-    print(tabulate(actions, headers=[
-          "Action", "Input", "Stack"], tablefmt="grid"))
+    # Write the parsing steps to a file
+    filename = "parsing_steps.txt"
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(tabulate(actions, headers=[
+            "Action", "Input", "Stack"], tablefmt="grid"))
+    print("\n\tParsing steps saved to ", filename, end='\n\n')
+
+
     if stack or index < len(tokens):
         print("Parsing failed! The string is rejected by the grammar.")
     else:
@@ -377,7 +395,6 @@ def parse_sentence(grammar, parse_table, tokens):
 
 if __name__ == "__main__":
     tokens = use_tokens()
-    print(tokens)
     first_sets = {nt: find_first(grammar_dict, nt) for nt in grammar_dict}
     follow_sets = {nt: find_follow(grammar_dict, nt, 'Program')
                    for nt in grammar_dict}

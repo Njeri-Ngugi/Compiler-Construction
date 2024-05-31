@@ -1,4 +1,3 @@
-import os
 import re
 import time
 
@@ -6,13 +5,6 @@ keywords = {"int", "float", "char", "void", "if", "else if", "else", "while", "r
 identifier_regex = r'\b(?!(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b)(?!^\d)[A-Za-z_][A-Za-z0-9_]*\b'
 
 token_types = {
-    # "Identifier": identifier_regex,
-    # "special_symbol": r"(?<!\S)[£$^#_:@&?](?!\S)",
-    # "integer": r'-?\b(?<!\.)[-+]?\d+\b(?!\.\d)',
-    # "float": r'-?\b\d+\.\d+\b',
-    # "punctuator": r'[\(\)\{\}\[\];]',
-    # "string": r'\".*?\"|\'(?:\\.|[^\\\'])*\'',
-    # "operator": r'[+\-/%<>^=!~]|<<|>>|\+\+|\-\-|&&|\|\||\+=|-=|\=|/=|%=|<<=|>>=|&=|\|=|\^=|==|!=|<=|>=|->'
     "Keyword": r'\b(?:int|float|char|else if|else|while|for|void|const)\b',
     "Identifier": identifier_regex,
     "Return": r'\breturn\b',
@@ -68,7 +60,7 @@ def scan_file(file_path):
 
 if __name__ == "__main__":
     start_time = time.time()
-    input_file = '../Scanner_Program/mini.c'
+    input_file = 'Parser/mini2.c'
     tokens = scan_file(input_file)
 
     end_time = time.time()
